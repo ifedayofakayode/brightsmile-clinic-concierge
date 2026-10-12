@@ -2,11 +2,11 @@
 
 > A bilingual (English/Spanish) WhatsApp assistant that answers questions, quotes prices, books appointments and collects deposits for a service business. It runs on n8n, and **every price, policy and time slot comes from your own data, never from the AI's imagination.**
 
-**Demo video:** [Watch the walkthrough (REPLACE_WITH_LOOM_URL)](REPLACE_WITH_LOOM_URL)  |  **Diagram:** [`docs/architecture.png`](docs/architecture.png)  |  **Runbook:** [`docs/runbook.md`](docs/runbook.md)  |  **Tests:** [`docs/test-results.md`](docs/test-results.md)
+**Demo video:** [Watch the walkthrough (REPLACE_WITH_LOOM_URL)](REPLACE_WITH_LOOM_URL)  |  **Diagram:** [`docs/architecture.png`](docs/workflow-canvas.png)  |  **Runbook:** [`docs/runbook.md`](docs/runbook.md)  |  **Tests:** [`docs/test-results.md`](docs/test-results.md)
 
-![Architecture](docs/architecture.png)
+![Architecture](docs/workflow-canvas.png)
 
-> **Portfolio project, not a client deployment.** This is a demonstration built from scratch around a fictional clinic ("BrightSmile Dental (Demo)"). All names, prices, addresses and phone numbers are made up, and payments run in Stripe **test mode**. Nothing here has been used with real patients.
+> **Portfolio project, not a client deployment.** This is a demonstration built from scratch around a fictional clinic ("BrightSmile Dental"). All names, prices, addresses and phone numbers are made up, and payments run in Stripe **test mode**. Nothing here has been used with real patients.
 
 ## Contents
 
@@ -265,8 +265,6 @@ A 30-case test plan covers FAQs in both languages, price accuracy, the full book
 
 Results are recorded in [`docs/test-results.md`](docs/test-results.md). 
 
-> **TODO before publishing:** run the plan and write the real pass rate here, for example "X of 30 passed on the second round, Y documented as known limitations". Do not publish a number you have not measured.
-
 ## Reliability and observability
 
 - **Retries:** external calls retry up to three times with a short wait.
@@ -348,10 +346,10 @@ clinic-concierge/
 
 ## About the author
 
-Built by **Max**, an AI automation engineer, as a demonstration of production-minded WhatsApp automation: grounded answers, safe failure modes and clear documentation.
+Built by Ifedayo **Max** Fakayode, an AI automation engineer, as a demonstration of production-minded WhatsApp automation: grounded answers, safe failure modes and clear documentation.
 
-- Contact: REPLACE_WITH_YOUR_EMAIL
-- Portfolio / Upwork: REPLACE_WITH_YOUR_LINK
+- Contact: steven.fakayode@gmail.com
+- Upwork: [Upwork Profile](https://www.upwork.com/freelancers/ifedayofakayodeai?mp_source=share)
 
 ## License
 
