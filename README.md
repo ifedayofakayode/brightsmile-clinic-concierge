@@ -51,19 +51,17 @@ This project is a worked answer to one question: **how do you put an LLM in fron
 
 Tick only what you have built **and tested**. This table is the honest map of the project.
 
-<!-- TODO before publishing: tick the boxes that are true for your build, delete this comment. -->
-
-- [ ] Intake: webhook, normalization, deduplication, logging, conversation memory
-- [ ] Language detection and intent routing with validated AI output
-- [ ] FAQ answers from the knowledge base (EN/ES)
-- [ ] Price replies from the Services table
-- [ ] Availability and slot selection
-- [ ] Slot hold and Stripe deposit link
-- [ ] Payment webhook: confirm booking, create calendar event, notify customer
-- [ ] Expire unpaid holds
-- [ ] Output guard
-- [ ] Error workflow with alerts
-- [ ] Human handoff and lead scoring
+- [x] Intake: webhook, normalization, deduplication, logging, conversation memory
+- [x] Language detection and intent routing with validated AI output
+- [x] FAQ answers from the knowledge base (EN/ES)
+- [x] Price replies from the Services table
+- [x] Availability and slot selection
+- [x] Slot hold and Stripe deposit link
+- [x] Payment webhook: confirm booking, create calendar event, notify customer
+- [x] Expire unpaid holds
+- [x] Output guard
+- [x] Error workflow with alerts
+- [x] Human handoff and lead scoring
 - [ ] 24-hour reminders with approved templates
 - [ ] Daily report
 
@@ -245,7 +243,7 @@ The channel layer is isolated in two nodes (the trigger and the send node). To u
 
 ## Example conversation
 
-*Illustrative transcript of the designed behaviour. Replace it with a real screenshot from your own run.*
+*Illustrative transcript of the designed behaviour.*
 
 ```text
 Customer:  Hola, ¿cuánto cuesta una limpieza?
