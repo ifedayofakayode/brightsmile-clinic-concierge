@@ -2,9 +2,9 @@
 
 > A bilingual (English/Spanish) WhatsApp assistant that answers questions, quotes prices, books appointments and collects deposits for a service business. It runs on n8n, and **every price, policy and time slot comes from your own data, never from the AI's imagination.**
 
-**Demo video:** [Watch the walkthrough (REPLACE_WITH_LOOM_URL)](REPLACE_WITH_LOOM_URL)  |  **Diagram:** [`docs/architecture.png`](docs/workflow-canvas.png)  |  **Runbook:** [`docs/runbook.md`](docs/runbook.md)  |  **Tests:** [`docs/test-results.md`](docs/test-results.md)
+**Demo video:** [Watch the walkthrough (REPLACE_WITH_LOOM_URL)](REPLACE_WITH_LOOM_URL)  |  **Diagram:** [`docs/architecture.png`](docs/brightsmile-workflow.png)  |  **Runbook:** [`docs/runbook.md`](docs/runbook.md)  |  **Tests:** [`docs/test-results.md`](docs/test-results.md)
 
-![Architecture](docs/workflow-canvas.png)
+![Architecture](docs/brightsmile-workflow.png)
 
 > **Portfolio project, not a client deployment.** This is a demonstration built from scratch around a fictional clinic ("BrightSmile Dental"). All names, prices, addresses and phone numbers are made up, and payments run in Stripe **test mode**. Nothing here has been used with real patients.
 
