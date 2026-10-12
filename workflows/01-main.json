@@ -1,0 +1,3738 @@
+{
+  "name": "BrightSmile_Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "events": [
+          "message:in:new"
+        ],
+        "sampleEvent": "inbound-text"
+      },
+      "type": "n8n-nodes-wassenger.wassengerTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4464,
+        -800
+      ],
+      "id": "d4220464-4090-4078-b8c3-d34a63718b21",
+      "name": "Wassenger Trigger",
+      "webhookId": "7cc348fd-2dbd-4124-912f-5fff341e9a13",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// Ensure it's an inbound message event and data exists\nif (!item.data || item.event !== 'message:in:new') {\n  return []; // Stop here for non-message events or receipts\n}\n\nconst msg = item.data;\nconst contact = msg.chat && msg.chat.contact ? msg.chat.contact : {};\n\nlet text = '';\nif (msg.type === 'text') {\n  text = msg.body || '';\n} else if (msg.type === 'interactive') {\n  const i = msg.interactive || {};\n  text = (i.button_reply && i.button_reply.title) || (i.list_reply && i.list_reply.title) || '';\n}\n\nreturn [{ \n  json: {\n    message_id: msg.id,\n    phone: msg.fromNumber || msg.from,\n    name: contact.name || msg.meta?.notifyName || '',\n    type: msg.type,\n    text: text.trim(),\n    correlation_id: (msg.id ? msg.id.slice(-12) : 'msg') + '-' + Date.now(),\n    received_at: msg.date || new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4240,
+        -800
+      ],
+      "id": "24dc6794-40cd-4fd1-8cd0-5747c4197b7d",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcef7f6b-107c-4b55-b3f1-938555683d3c",
+              "leftValue": "={{ $('Normalize').item.json.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3568,
+        -800
+      ],
+      "id": "0c258eb7-feb3-4748-b95a-25e08dbf7998",
+      "name": "Is Text?"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblczZf9Pge4kt3Gr",
+          "mode": "list",
+          "cachedResultName": "Message_log",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblczZf9Pge4kt3Gr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "message_id": "={{ $('Normalize').item.json.message_id }}",
+            "phone": "={{ $('Normalize').item.json.phone }}",
+            "direction": "in",
+            "text": "={{ $('Normalize').item.json.text }}",
+            "correlation_id": "={{ $('Normalize').item.json.correlation_id }}",
+            "created_at": "={{ $('Normalize').item.json.received_at }}"
+          },
+          "matchingColumns": [
+            "message_id"
+          ],
+          "schema": [
+            {
+              "id": "log_id",
+              "displayName": "log_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "direction",
+              "displayName": "direction",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "in",
+                  "value": "in"
+                },
+                {
+                  "name": "out",
+                  "value": "out"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tool_used",
+              "displayName": "tool_used",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "guard_result",
+              "displayName": "guard_result",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "correlation_id",
+              "displayName": "correlation_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -3344,
+        -800
+      ],
+      "id": "60c6da44-32e6-4956-b644-3a37491a3358",
+      "name": "Log Inbound",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ZtvnnHd1WBtoX",
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbl6ZtvnnHd1WBtoX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "human_takeover": false,
+            "phone": "={{ $('Normalize').item.json.phone }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "idle",
+                  "value": "idle"
+                },
+                {
+                  "name": "choosing_service",
+                  "value": "choosing_service"
+                },
+                {
+                  "name": "choosing_slot",
+                  "value": "choosing_slot"
+                },
+                {
+                  "name": "awaiting_payment",
+                  "value": "awaiting_payment"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_service_id",
+              "displayName": "pending_service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_slots",
+              "displayName": "pending_slots",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_appointment_id",
+              "displayName": "pending_appointment_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "human_takeover",
+              "displayName": "human_takeover",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -3120,
+        -800
+      ],
+      "id": "a152134f-7ef4-492d-b071-ff6be07d38eb",
+      "name": "Get Conversation",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $('Normalize').first().json;\nconst rec = $input.first().json;\n// Airtable may return the columns inside a 'fields' object; handle both shapes\nconst c = rec.fields || rec;\nreturn [{ json: {\n  ...msg,\n  conv_id: rec.id,\n  state: c.state || 'idle',\n  language: c.language || '',\n  human_takeover: c.human_takeover === true,\n  pending_service_id: c.pending_service_id || '',\n  pending_slots: c.pending_slots || '',\n  pending_appointment_id: c.pending_appointment_id || ''\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2896,
+        -800
+      ],
+      "id": "5ef8a204-f085-4769-8a86-72d8713de961",
+      "name": "Build Context"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "66a0bbf4-ad83-41d1-ad57-e2f84be90fa5",
+              "leftValue": "={{ $json.human_takeover }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2672,
+        -800
+      ],
+      "id": "47357298-8b3d-4549-8910-184e546744be",
+      "name": "Human In Control?"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblLsoatIGIk2voln",
+          "mode": "list",
+          "cachedResultName": "Services",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblLsoatIGIk2voln"
+        },
+        "filterByFormula": "{active} = 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -2512,
+        -800
+      ],
+      "id": "f4ea082b-127a-4412-8196-ebed0fb9bc0a",
+      "name": "Get Services",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Build Context').first().json;\nconst t = c.text.toLowerCase().trim();\nlet route = 'llm';\nif (['human', 'humano', 'agent', 'agente', 'persona'].includes(t)) route = 'handoff';\nelse if (['reset', 'menu', 'menú', 'start', 'inicio', 'reinicio', 'reiniciar'].includes(t)) route = 'reset';\nelse if (/^[0-9]{1,2}$/.test(t) && (c.state === 'choosing_service' || c.state === 'choosing_slot')) route = 'choice';\nreturn [{ json: { ...c, route } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2288,
+        -800
+      ],
+      "id": "3ab78ee4-2e19-488f-a908-a7f7a7d1964f",
+      "name": "Quick Rules"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "handoff",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9352dac3-5a3c-40d3-afe9-c7d3cde24f8e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "handoff"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "566f9dd7-e8f6-4dc8-8dbb-78beca2f9c72",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "reset",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reset"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "14b2e5bb-56ba-4641-bdfc-2775e74dcccf",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "choice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "choice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "dcfa19c7-5cb5-4873-afec-df0fe0f96491",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "llm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "llm"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2064,
+        -832
+      ],
+      "id": "8a2730b6-7ef3-4e37-b6ac-176800249ee5",
+      "name": "Route"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $('Quick Rules').item.json.text }}"
+            },
+            {
+              "role": "system",
+              "content": "=You are the intent classifier for a dental clinic's WhatsApp assistant. You do NOT answer the customer. You must output valid raw JSON only, with no markdown formatting blocks (do not use ```json or ```).\n\nReturn JSON with exactly these keys:\n- language: \"en\" or \"es\" (the language the customer wrote in; if unclear, use the previous language given below; default to \"en\")\n- intent: one of \"faq\", \"price\", \"availability\", \"book\", \"lead_info\", \"human\", \"greeting\", \"thanks\", \"out_of_scope\"\n- service_id: the best matching service_id from the list below, or an empty string if none matches\n- confidence: a number from 0 to 1 representing your confidence\n- date_hint: any date, time, or relative timeframe mentioned by the customer, or an empty string\n\nClassification Rules:\n- General greetings like \"hi\", \"hello\", \"good morning\", \"good afternoon\" are greeting.\n- Polite expressions of gratitude are thanks.\n- Questions about hours, location, insurance, policies, payment, children, emergencies and similar are faq.\n- Asking how much something costs, or asking for prices, is price.\n- Asking which days or times are open is availability.\n- Wanting to schedule, reschedule, or reserve is book.\n- Asking for a human agent, person, or complaining is human.\n- Sharing a name or treatment preference without a question is lead_info.\n- Requests for medical advice, diagnosis, or medication are out_of_scope.\n- When unsure, lower the confidence. Never invent a service_id that is not in the list.\n\nAvailable Services (service_id: English name / Spanish name):\n{{ $('Get Services').all().length > 0 ? $('Get Services').all().map(i => i.json.fields.service_id + ': ' + i.json.fields.name_en + ' / ' + i.json.fields.name_es).join(' | ') : 'None available' }}\n\nCustomer's previous language: {{ $('Quick Rules').first().json.language || 'en' }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -1840,
+        -1216
+      ],
+      "id": "a6bdddf1-c3b2-4820-9255-8a2a2da31500",
+      "name": "Classify Intent",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Quick Rules').first().json;\nconst raw = $input.first().json;\n\n// Target the deep nested structure: raw.output[0].content[0].text\nlet text = '';\nif (raw.output && Array.isArray(raw.output) && raw.output[0]) {\n  const content = raw.output[0].content;\n  if (content && Array.isArray(content) && content[0]) {\n    text = content[0].text || '';\n  }\n}\n\n// Fallbacks for safety\nif (!text) {\n  text = raw.text || raw.message?.content || '';\n}\nif (typeof text !== 'string') text = JSON.stringify(text);\n\n// Clean up markdown block code fences if present\nconst fence = String.fromCharCode(96).repeat(3);\ntext = text.split(fence + 'json').join('').split(fence).join('').trim();\n\nconst allowed = ['faq', 'price', 'availability', 'book', 'lead_info', 'human', 'greeting', 'thanks', 'out_of_scope'];\nlet ai = null;\ntry { ai = JSON.parse(text); } catch (e) { ai = null; }\nconst ok = !!(ai && allowed.includes(ai.intent));\n\n// Match against Airtable fields nested object structure\nconst validIds = $('Get Services').all().map(i => i.json.fields?.service_id);\n\nconst result = {\n  language: ok && (ai.language === 'es' || ai.language === 'en') ? ai.language : (c.language || 'en'),\n  intent: ok ? ai.intent : 'low_confidence',\n  service_id: ok && validIds.includes(ai.service_id) ? ai.service_id : '',\n  confidence: ok && typeof ai.confidence === 'number' ? ai.confidence : 0,\n  date_hint: ok && ai.date_hint ? String(ai.date_hint) : '',\n  ai_valid: ok\n};\n\nif (result.confidence < 0.6) result.intent = 'low_confidence';\nreturn [{ json: { ...c, ...result } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1488,
+        -1216
+      ],
+      "id": "859d5d1d-660c-4a74-833d-fb57959ac7fd",
+      "name": "Validate AI JSON"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ZtvnnHd1WBtoX",
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbl6ZtvnnHd1WBtoX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "human_takeover": false,
+            "id": "={{ $json.conv_id }}",
+            "language": "={{ $json.language }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "idle",
+                  "value": "idle"
+                },
+                {
+                  "name": "choosing_service",
+                  "value": "choosing_service"
+                },
+                {
+                  "name": "choosing_slot",
+                  "value": "choosing_slot"
+                },
+                {
+                  "name": "awaiting_payment",
+                  "value": "awaiting_payment"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_service_id",
+              "displayName": "pending_service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_slots",
+              "displayName": "pending_slots",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_appointment_id",
+              "displayName": "pending_appointment_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "human_takeover",
+              "displayName": "human_takeover",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1392,
+        -496
+      ],
+      "id": "e2152bf5-6c3a-4bce-b4ff-5577c1709218",
+      "name": "Save Language",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\n\n// 1. Fetch data safely from Validate AI JSON if it went through the LLM path\nlet aiNode = {};\ntry {\n  aiNode = $('Validate AI JSON').item.json;\n} catch (e) {\n  // Bypassed the AI path (e.g., direct route text matching)\n}\n\n// 2. FETCH ORIGINAL CONTEXT VALUES (Fixes the missing state properties)\nlet baseContext = {};\ntry {\n  baseContext = $('Build Context').item.json;\n} catch (e) {\n  baseContext = c; // Fallback to current input if Build Context is inaccessible\n}\n\nconst finalIntent = aiNode.intent || c.intent || 'low_confidence';\nconst finalLanguage = aiNode.language || c.language || baseContext.language || 'en';\nconst L = finalLanguage === 'es' ? 'es' : 'en';\n\n// Map routing behavior based on conditions\nconst route = c.route || baseContext.route;\nconst key = route === 'reset' ? 'reset' : (route === 'handoff' ? 'handoff' : finalIntent);\n\nconst T = {\n  greeting: { \n    en: 'Hi! I am the virtual assistant of BrightSmile Dental. I can answer questions, check prices and book appointments. How can I help?', \n    es: '¡Hola! Soy el asistente virtual de BrightSmile Dental. Puedo responder preguntas, consultar precios y agendar citas. ¿En qué le puedo ayudar?' \n  },\n  thanks: { \n    en: 'You are welcome! Let me know if you need anything else.', \n    es: '¡Con gusto! Avíseme si necesita algo más.' \n  },\n  reset: { \n    en: 'Okay, we start over. How can I help you?', \n    es: 'De acuerdo, empecemos de nuevo. ¿En qué le puedo ayudar?' \n  },\n  handoff: {\n    en: 'I am transferring you to a human agent. Please hold.',\n    es: 'Le estoy transfiriendo a un agente humano. Por favor espere.'\n  },\n  out_of_scope: { \n    en: 'I cannot give medical advice. The dentist can help you at your visit. I can book you an appointment, or reply HUMAN to talk to our team.', \n    es: 'No puedo dar consejos médicos. El dentista puede ayudarle en su visita. Puedo agendarle una cita, o responda HUMANO para hablar con nuestro equipo.' \n  },\n  low_confidence: { \n    en: 'I am not sure I understood, and I do not want to give you wrong information. Ask me about hours, prices, insurance or booking, or reply HUMAN to talk to our team.', \n    es: 'No estoy seguro de haber entendido y no quiero darle información incorrecta. Pregúnteme por horarios, precios, seguro o citas, o responda HUMANO para hablar con nuestro equipo.' \n  }\n};\n\nconst row = T[key] || T.low_confidence;\nconst isReset = key === 'reset';\n\nreturn [{ json: { \n  ...c,\n  intent: finalIntent,\n  language: finalLanguage,\n  reply_text: row[L], \n  tool_used: 'template:' + key,\n  new_state: isReset ? 'idle' : (baseContext.state || 'idle'),\n  new_pending_slots: isReset ? '' : (baseContext.pending_slots || ''),\n  new_pending_service: isReset ? '' : (baseContext.pending_service_id || ''),\n  new_pending_appt: isReset ? '' : (baseContext.pending_appointment_id || '') \n}}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -976
+      ],
+      "id": "d2c5061c-3b34-43cb-a8d1-d7814d7aeb56",
+      "name": "Simple Replies"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ZtvnnHd1WBtoX",
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbl6ZtvnnHd1WBtoX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "human_takeover": false,
+            "state": "={{ $json.new_state }}",
+            "pending_slots": "={{ $json.new_pending_slots }}",
+            "pending_service_id": "={{ $json.new_pending_service }}",
+            "pending_appointment_id": "={{ $json.new_pending_appt }}",
+            "id": "={{ $json.conv_id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "idle",
+                  "value": "idle"
+                },
+                {
+                  "name": "choosing_service",
+                  "value": "choosing_service"
+                },
+                {
+                  "name": "choosing_slot",
+                  "value": "choosing_slot"
+                },
+                {
+                  "name": "awaiting_payment",
+                  "value": "awaiting_payment"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_service_id",
+              "displayName": "pending_service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_slots",
+              "displayName": "pending_slots",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_appointment_id",
+              "displayName": "pending_appointment_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "human_takeover",
+              "displayName": "human_takeover",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -2608
+      ],
+      "id": "4352ceb6-f0cd-4d3c-bcad-52bc8d7794bd",
+      "name": "Save State",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -2048
+      ],
+      "id": "99cbe2ab-b230-4220-a9d6-5c576c3f5d8e",
+      "name": "Output Guard"
+    },
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "phone": "={{ $('Build Context').item.json.phone }}",
+        "message": "={{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        816,
+        -1856
+      ],
+      "id": "1aefa6a1-17f3-4b16-96a3-d9742eb14499",
+      "name": "Send Reply",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblczZf9Pge4kt3Gr",
+          "mode": "list",
+          "cachedResultName": "Message_log",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblczZf9Pge4kt3Gr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('Build Context').item.json.phone }}",
+            "direction": "out",
+            "text": "={{ $json.reply_text }}",
+            "intent": "={{ $if($('Validate AI JSON').isExecuted, $json.intent,  \"\")}}",
+            "language": "={{ $json.language }}",
+            "tool_used": "={{ $json.tool_used }}",
+            "correlation_id": "={{ $('Route').item.json.correlation_id }}",
+            "created_at": "={{ $now.toISO() }}",
+            "guard_result": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "log_id",
+              "displayName": "log_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "direction",
+              "displayName": "direction",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "in",
+                  "value": "in"
+                },
+                {
+                  "name": "out",
+                  "value": "out"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tool_used",
+              "displayName": "tool_used",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "guard_result",
+              "displayName": "guard_result",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "correlation_id",
+              "displayName": "correlation_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        -2048
+      ],
+      "id": "dd2e7e71-8eca-47f9-b07b-025940178268",
+      "name": "Log Outbound",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblczZf9Pge4kt3Gr",
+          "mode": "list",
+          "cachedResultName": "Message_log",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblczZf9Pge4kt3Gr"
+        },
+        "filterByFormula": "={message_id} = '{{ $json.message_id }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -4016,
+        -800
+      ],
+      "id": "505087c4-2bee-4c49-9701-aae0875db558",
+      "name": "Check Duplicate",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "27c64fd1-8f63-4c54-87e3-4630d0f1f218",
+              "leftValue": "={{ $json.fields.message_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3792,
+        -800
+      ],
+      "id": "91cff3ac-2603-4c98-8f5f-873bc4a38a09",
+      "name": "If Duplicate?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "faq",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "884377e5-a3f8-450e-b0ea-738bc9ebc54f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "faq"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d136188a-ea79-48e6-9204-9049d4aed5ac",
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "price",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "price"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4b978396-fcbf-48e4-93c4-c4e392f838ff",
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "availability",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "availability"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "113f80d5-e289-4db7-9ea4-debf149536b3",
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "book"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6df64242-8c50-4556-9bd9-534512535287",
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "lead_info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "lead_info"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6acdab1b-f120-453e-88c8-2c197ccb2933",
+                    "leftValue": "={{ $('Validate AI JSON').item.json.intent }}",
+                    "rightValue": "human",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "human"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1264,
+        -1296
+      ],
+      "id": "874b9a49-a3d4-4d51-b242-3a83c27be606",
+      "name": "By Intent"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbls3v6hkFjXX0VRq",
+          "mode": "list",
+          "cachedResultName": "Knowledge_base",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbls3v6hkFjXX0VRq"
+        },
+        "filterByFormula": "{active} = 1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        -1504
+      ],
+      "id": "0bb00762-a2f5-4802-b189-7168a32b0930",
+      "name": "Get FAQ",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Validate AI JSON').first().json;\nconst NL = String.fromCharCode(10);\nconst list = $('Get FAQ').all().map(i => {\n  const f = i.json.fields || {};\n  return (f.kb_id || '') + ' | ' + (f.category || '') + ' | ' + (f.question_en || '') + ' | ' + (f.question_es || '');\n}).join(NL);\nreturn [{ json: { list, text: c.text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -1504
+      ],
+      "id": "aef0b94d-525d-4b3e-818c-6b3ee79d35eb",
+      "name": "Build FAQ List"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.text }}"
+            },
+            {
+              "role": "system",
+              "content": "=You match a customer's question to ONE row of a clinic FAQ list. You do not write answers.\nReturn JSON with exactly two keys: kb_id (the id of the matching row, or NONE) and confidence (0 to 1).\nChoose a row only if it directly answers the question. If no row answers it, or the question needs two different rows, return NONE.\nDo not guess.\n\nFAQ list (id | category | English question | Spanish question):\n{{ $json.list }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        -1504
+      ],
+      "id": "94aff874-4c2d-463a-a5a9-8efaf764045e",
+      "name": "Match FAQ",
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Validate AI JSON').first().json;\n\n// Extract rows correctly accounting for Airtable's .fields wrapper\nconst kb = $('Get FAQ').all().map(i => ({\n  id: i.json.id,\n  ...(i.json.fields || {})\n}));\n\nconst raw = $input.first().json;\n\n// Safely extract text from OpenAI response node output\nlet text = '';\nif (raw.output && Array.isArray(raw.output) && raw.output[0]) {\n  const content = raw.output[0].content;\n  if (content && Array.isArray(content) && content[0]) {\n    text = content[0].text || '';\n  }\n}\nif (!text) {\n  text = raw.text || raw.message?.content || raw.content || '';\n}\nif (typeof text !== 'string') text = JSON.stringify(text);\n\n// Clean markdown fences\nconst fence = String.fromCharCode(96).repeat(3);\ntext = text.split(fence + 'json').join('').split(fence).join('').trim();\n\nlet m = {};\ntry { m = JSON.parse(text); } catch (e) { m = {}; }\n\nconst L = c.language === 'es' ? 'es' : 'en';\n\n// Match kb_id against Airtable fields\nconst row = kb.find(r => r.kb_id === m.kb_id);\nconst keep = { \n  new_state: c.state, \n  new_pending_slots: c.pending_slots, \n  new_pending_service: c.pending_service_id, \n  new_pending_appt: c.pending_appointment_id \n};\n\nif (row && Number(m.confidence) >= 0.7) {\n  return [{ json: { \n    ...c, \n    ...keep, \n    reply_text: row['answer_' + L] || row['answer_en'] || 'Information found.', \n    tool_used: 'kb:' + row.kb_id \n  } }];\n}\n\nconst miss = { \n  en: 'I do not have a confirmed answer to that, and I do not want to guess. Reply HUMAN and our team will help you.', \n  es: 'No tengo una respuesta confirmada para eso y no quiero adivinar. Responda HUMANO y nuestro equipo le ayudará.' \n};\n\nreturn [{ json: { \n  ...c, \n  ...keep, \n  reply_text: miss[L], \n  tool_used: 'kb:none', \n  intent: 'faq_miss' \n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -1504
+      ],
+      "id": "2d90f31e-db54-4994-b12e-7fd612e597d4",
+      "name": "FAQ Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Validate AI JSON').first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst NL = String.fromCharCode(10);\n\n// Correctly unwrap Airtable's .fields wrapper\nconst services = $('Get Services').all().map(i => ({\n  id: i.json.id,\n  ...(i.json.fields || {})\n}));\n\nconst money = n => '$' + Number(n).toFixed(2).replace('.00', '');\nconst keep = { new_state: c.state, new_pending_slots: c.pending_slots, new_pending_service: c.pending_service_id, new_pending_appt: c.pending_appointment_id };\nconst isStale = s => { const age = (Date.now() - new Date(s.last_verified).getTime()) / 86400000; return !(age <= 90); };\n\nconst svc = services.find(s => s.service_id === c.service_id);\nlet text;\nlet tool = 'price:list';\n\nif (svc) {\n  tool = 'price:' + svc.service_id;\n  if (isStale(svc)) {\n    text = L === 'es' ? 'Necesito confirmar el precio actual con el equipo. Responda HUMANO y le ayudamos.' : 'I need to confirm the current price with the team. Reply HUMAN and we will help you.';\n  } else if (L === 'es') {\n    text = '*' + svc.name_es + '*: ' + money(svc.price_usd) + ' USD. Duración aproximada: ' + svc.duration_min + ' minutos. Un depósito de ' + money(svc.deposit_usd) + ' reserva su cita y se descuenta de su cuenta final. Los precios son estimados antes del examen y su seguro puede cambiar lo que usted paga. ¿Desea agendar?';\n  } else {\n    text = '*' + svc.name_en + '*: ' + money(svc.price_usd) + ' USD. Duration is about ' + svc.duration_min + ' minutes. A deposit of ' + money(svc.deposit_usd) + ' secures your booking and is deducted from your final bill. Prices are estimates before your exam, and insurance may change what you pay. Would you like to book?';\n  }\n} else {\n  const lines = services.map(s => '- ' + s['name_' + L] + ': ' + money(s.price_usd));\n  text = (L === 'es' ? 'Esta es nuestra lista de precios (USD, estimados antes del examen):' : 'Here is our price list (USD, estimates before your exam):') + NL + lines.join(NL);\n}\n\nreturn [{ json: { ...c, ...keep, reply_text: text, tool_used: tool } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -1312
+      ],
+      "id": "28910b0a-f88d-462b-8f84-e2612efa3474",
+      "name": "Price Reply"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\nconst services = $('Get Services').all().map(i => ({\n  id: i.json.id,\n  ...(i.json.fields || {})\n}));\nconst n = parseInt(c.text, 10);\nlet step = 'ask_service';\nlet serviceId = c.service_id || '';\nlet chosen = null;\nif (c.route === 'choice' && c.state === 'choosing_service') {\n  let ids = [];\n  try { ids = JSON.parse(c.pending_slots); } catch (e) { ids = []; }\n  if (n >= 1 && n <= ids.length) { serviceId = ids[n - 1]; step = 'slots'; } else { step = 'invalid'; }\n} else if (c.route === 'choice' && c.state === 'choosing_slot') {\n  let slots = [];\n  try { slots = JSON.parse(c.pending_slots); } catch (e) { slots = []; }\n  serviceId = c.pending_service_id;\n  if (n >= 1 && n <= slots.length) { chosen = slots[n - 1]; step = 'hold'; } else { step = 'invalid'; }\n} else if (serviceId) {\n  step = 'slots';\n}\nconst svc = services.find(s => s.service_id === serviceId) || null;\nreturn [{ json: { ...c, step, service_id: serviceId, svc, chosen_slot: chosen } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        -2272
+      ],
+      "id": "69c2f189-4ee4-41c9-9d3d-31e3f83eefb1",
+      "name": "Booking Router"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.step }}",
+                    "rightValue": "ask_service",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b3316a36-60b2-43c4-b26a-f1afe4d27844"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ask_service"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "541b4fc2-654f-4f01-8d63-62ce37def7fb",
+                    "leftValue": "={{ $json.step }}",
+                    "rightValue": "slots",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "slots"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6c4ee3b0-0b0d-409e-8980-2c4e3c2b93d9",
+                    "leftValue": "={{ $json.step }}",
+                    "rightValue": "hold",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "hold"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4f46fa2f-9abb-457c-bd70-3784be3c7d3b",
+                    "leftValue": "={{ $json.step }}",
+                    "rightValue": "invalid",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "invalid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -896,
+        -2304
+      ],
+      "id": "a2d76cb4-fb4b-4118-a495-77f735517ebc",
+      "name": "Booking Step"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst NL = String.fromCharCode(10);\n\n// Correctly unwrap Airtable's .fields wrapper\nconst services = $('Get Services').all().map(i => ({\n  id: i.json.id,\n  ...(i.json.fields || {})\n}));\n\nconst lines = services.map((s, i) => (i + 1) + '. ' + (s['name_' + L] || s.name_en || 'Service'));\nconst head = L === 'es' ? '¿Qué servicio desea agendar? Responda con el número:' : 'Which service would you like to book? Reply with the number:';\n\nreturn [{ json: { \n  ...c, \n  reply_text: head + NL + lines.join(NL), \n  tool_used: 'booking:ask_service',\n  new_state: 'choosing_service', \n  new_pending_slots: JSON.stringify(services.map(s => s.service_id)), \n  new_pending_service: '', \n  new_pending_appt: '' \n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -2576
+      ],
+      "id": "7b91351f-4f18-4368-9b55-ff95de1a25b8",
+      "name": "Ask Service"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "BrightSmile"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.toISO() }}",
+        "timeMax": "={{ $now.plus({days: 15}).toISO() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -672,
+        -2368
+      ],
+      "id": "2c06617a-e74d-430e-9831-06445a127c20",
+      "name": "Get Calendar Events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "filterByFormula": "=OR({status}='held', {status}='paid')",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        -2368
+      ],
+      "id": "73f4595f-1ac1-4f4e-9daf-9e6285a6251e",
+      "name": "Get Held Slots",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Booking Router').first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst NL = String.fromCharCode(10);\nconst svc = c.svc;\nif (!svc) {\n  const msgText = L === 'es' ? 'No pude identificar el servicio. Escriba REINICIAR y vuelva a intentar.' : 'I could not identify the service. Type RESET and try again.';\n  return [{ json: { ...c, reply_text: msgText, tool_used: 'booking:no_service', slots: [], new_state: 'idle', new_pending_slots: '', new_pending_service: '', new_pending_appt: '' } }];\n}\nconst ZONE = 'America/Chicago';\nconst now = DateTime.now().setZone(ZONE);\nconst earliest = now.plus({ hours: 4 });\nconst busy = [];\nfor (const it of $('Get Calendar Events').all()) {\n  const s = it.json.start && (it.json.start.dateTime || it.json.start.date);\n  const e = it.json.end && (it.json.end.dateTime || it.json.end.date);\n  if (s && e) busy.push([DateTime.fromISO(s), DateTime.fromISO(e)]);\n}\nfor (const it of $('Get Held Slots').all()) {\n  const j = it.json.fields || it.json;\n  if (!j.start_iso || !j.end_iso) continue;\n  if (j.status === 'held' && j.hold_expires_iso && DateTime.fromISO(j.hold_expires_iso) < now) continue;\n  busy.push([DateTime.fromISO(j.start_iso), DateTime.fromISO(j.end_iso)]);\n}\nconst hours = { 1: [9, 17], 2: [9, 17], 3: [9, 17], 4: [9, 17], 5: [9, 17], 6: [9, 13] };\nconst slots = [];\nfor (let d = 0; d < 14 && slots.length < 5; d++) {\n  const day = now.startOf('day').plus({ days: d });\n  const h = hours[day.weekday];\n  if (!h) continue;\n  let t = day.set({ hour: h[0] });\n  const close = day.set({ hour: h[1] });\n  let perDay = 0;\n  while (t.plus({ minutes: svc.duration_min }) <= close && slots.length < 5 && perDay < 2) {\n    const end = t.plus({ minutes: svc.duration_min });\n    const clash = busy.some(b => t < b[1] && end > b[0]);\n    if (t >= earliest && !clash) { slots.push({ start: t.toISO(), end: end.toISO() }); perDay++; t = t.plus({ hours: 3 }); }\n    else { t = t.plus({ minutes: 30 }); }\n  }\n}\nconst name = svc['name_' + L];\nlet text;\nif (slots.length === 0) {\n  text = L === 'es' ? 'No veo horarios disponibles en los próximos días. Responda HUMANO y nuestro equipo le ayudará.' : 'I do not see open times in the next few days. Reply HUMAN and our team will help you.';\n} else {\n  const lines = slots.map((s, i) => (i + 1) + '. ' + DateTime.fromISO(s.start).setZone(ZONE).setLocale(L).toFormat('ccc d LLL, h:mm a'));\n  const head = L === 'es' ? 'Para *' + name + '* (unos ' + svc.duration_min + ' min) estos horarios están libres (hora del Centro). Responda con el número:' : 'For *' + name + '* (about ' + svc.duration_min + ' min) these times are open (Central Time). Reply with the number:';\n  text = head + NL + lines.join(NL);\n}\nconst has = slots.length > 0;\nreturn [{ json: { ...c, reply_text: text, tool_used: 'booking:slots', slots,\n  new_state: has ? 'choosing_slot' : 'idle', new_pending_slots: has ? JSON.stringify(slots) : '', new_pending_service: has ? c.service_id : '', new_pending_appt: '' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -2368
+      ],
+      "id": "c3636697-24cc-4d9e-8a78-8e66b5e1f511",
+      "name": "Make Slots"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "filterByFormula": "=AND(OR({status}='held', {status}='paid', {status}='confirmed'), {start_iso} = '{{ $json.chosen_slot.start }}')",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -672,
+        -2128
+      ],
+      "id": "d473f181-916f-43d9-8735-3463455813ad",
+      "name": "Recheck Slot",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fa793df7-1ff1-48da-824e-9a3d56e9729c",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        -2128
+      ],
+      "id": "3c2d47d7-4fdb-4ef1-88b3-c6f2271cb12f",
+      "name": "Slot still free?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Booking Router').first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst text = L === 'es' ? 'Ese horario acaba de ocuparse. Escriba AGENDAR para ver horarios nuevos.' : 'That time was just taken. Say BOOK to see new times.';\nreturn [{ json: { ...c, reply_text: text, tool_used: 'booking:slot_taken', new_state: 'idle', new_pending_slots: '', new_pending_service: '', new_pending_appt: '' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -1936
+      ],
+      "id": "5ad2abf1-1cc2-472a-bfa0-07ecf76a92ab",
+      "name": "Slot Taken"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('Booking Router').item.json.phone }}",
+            "name": "={{ $('Booking Router').item.json.name }}",
+            "service_id": "={{ $('Booking Router').item.json.service_id }}",
+            "start_iso": "={{ $('Booking Router').first().json.chosen_slot.start }}",
+            "end_iso": "={{ $('Booking Router').first().json.chosen_slot.end }}",
+            "status": "held",
+            "hold_expires_iso": "={{ $now.plus({minutes: 15}).toISO() }}",
+            "deposit_usd": "={{ $('Booking Router').item.json.svc.deposit_usd }}",
+            "language": "={{ $('Booking Router').item.json.language }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "appt_id",
+              "displayName": "appt_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_iso",
+              "displayName": "start_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "end_iso",
+              "displayName": "end_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "held",
+                  "value": "held"
+                },
+                {
+                  "name": "paid",
+                  "value": "paid"
+                },
+                {
+                  "name": "confirmed",
+                  "value": "confirmed"
+                },
+                {
+                  "name": "cancelled",
+                  "value": "cancelled"
+                },
+                {
+                  "name": "expired",
+                  "value": "expired"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hold_expires_iso",
+              "displayName": "hold_expires_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stripe_session_id",
+              "displayName": "stripe_session_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "deposit_usd",
+              "displayName": "deposit_usd",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reminder_sent",
+              "displayName": "reminder_sent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        -2128
+      ],
+      "id": "c4749149-8e47-4f0d-837b-bbd65cf33902",
+      "name": "Create Held Appointment",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Booking Router').first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\n\nconst text = L === 'es'\n  ? 'Responda con uno de los números de la lista, o escriba REINICIAR para empezar de nuevo.'\n  : 'Please reply with one of the numbers in the list, or say RESET to start over.';\n\nconst keep = {\n  new_state: c.state,\n  new_pending_slots: c.pending_slots,\n  new_pending_service: c.pending_service_id,\n  new_pending_appt: c.pending_appointment_id\n};\n\nreturn [{ json: {\n  ...c,\n  ...keep,\n  reply_text: text,\n  tool_used: 'booking:invalid_choice'\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -1744
+      ],
+      "id": "94b07c34-4102-455b-8655-a95a65d1d671",
+      "name": "Invalid Choice"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.stripe.com/v1/checkout/sessions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "mode",
+              "value": "payment"
+            },
+            {
+              "name": "success_url",
+              "value": "https://example.com/success"
+            },
+            {
+              "name": "cancel_url",
+              "value": "https://example.com/cancel"
+            },
+            {
+              "name": "line_items[0][quantity]",
+              "value": "1"
+            },
+            {
+              "name": "line_items[0][price_data][currency]",
+              "value": "usd"
+            },
+            {
+              "name": "line_items[0][price_data][unit_amount]",
+              "value": "={{ Math.round($('Booking Router').first().json.svc.deposit_usd * 100) }}"
+            },
+            {
+              "name": "line_items[0][price_data][product_data][name]",
+              "value": "=Deposit: {{ $('Booking Router').first().json.svc.name_en }}"
+            },
+            {
+              "name": "metadata[appointment_record_id]",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "metadata[phone]",
+              "value": "={{ $('Booking Router').first().json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        64,
+        -2128
+      ],
+      "id": "d362b120-9d7a-424a-9c62-26105da4a8b1",
+      "name": "Create Stripe Checkout",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Stripe"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Booking Router').first().json;\nconst appt = $('Create Held Appointment').first().json;\nconst st = $input.first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst NL = String.fromCharCode(10);\nconst when = DateTime.fromISO(c.chosen_slot.start).setZone('America/Chicago').setLocale(L).toFormat('cccc d LLLL, h:mm a');\nconst name = c.svc['name_' + L];\nconst dep = '$' + Number(c.svc.deposit_usd).toFixed(2).replace('.00', '');\nconst text = L === 'es'\n  ? ['*Resumen de su cita*', name, when + ' (hora del Centro)', 'Depósito: ' + dep + ' (se descuenta de su cuenta final)', '', 'Pague aquí para confirmar. Su horario está reservado por 15 minutos:', st.url].join(NL)\n  : ['*Your appointment summary*', name, when + ' (Central Time)', 'Deposit: ' + dep + ' (deducted from your final bill)', '', 'Pay here to confirm. Your slot is held for 15 minutes:', st.url].join(NL);\nreturn [{ json: { ...c, reply_text: text, tool_used: 'booking:payment_link', stripe_session_id: st.id, appt_record_id: appt.id,\n  new_state: 'awaiting_payment', new_pending_slots: '', new_pending_service: c.service_id, new_pending_appt: appt.id } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -2128
+      ],
+      "id": "9847b79f-fe48-46ff-a0c1-f422b6618459",
+      "name": "Payment Reply"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.appt_record_id }}",
+            "stripe_session_id": "={{ $json.stripe_session_id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "appt_id",
+              "displayName": "appt_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_iso",
+              "displayName": "start_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "end_iso",
+              "displayName": "end_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "held",
+                  "value": "held"
+                },
+                {
+                  "name": "paid",
+                  "value": "paid"
+                },
+                {
+                  "name": "confirmed",
+                  "value": "confirmed"
+                },
+                {
+                  "name": "cancelled",
+                  "value": "cancelled"
+                },
+                {
+                  "name": "expired",
+                  "value": "expired"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hold_expires_iso",
+              "displayName": "hold_expires_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stripe_session_id",
+              "displayName": "stripe_session_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "deposit_usd",
+              "displayName": "deposit_usd",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -1696
+      ],
+      "id": "e60577cc-0f0f-4c2c-b1cb-a262c3230e2c",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldXwAu9Wl5fxzs9",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbldXwAu9Wl5fxzs9"
+        },
+        "filterByFormula": "={phone} = '{{ $json.phone }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1280,
+        -1920
+      ],
+      "id": "1cd0f439-9f78-4a7a-afc7-c4d79f1a067f",
+      "name": "Find Lead",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Validate AI JSON').first().json;\nconst prev = $input.first().json;\nconst old = Number(prev.score) || 0;\nconst pts = { faq: 5, price: 15, availability: 20, book: 30, lead_info: 10 }[c.intent] || 0;\nconst bonus = c.service_id ? 10 : 0;\nconst score = Math.min(100, old + pts + bonus);\nlet status = prev.status || 'new';\nif (status !== 'booked' && status !== 'handoff' && score >= 40) status = 'qualified';\nreturn [{ json: { phone: c.phone, name: c.name, language: c.language, service_interest: c.service_id || prev.service_interest || '', score, status, last_seen: new Date().toISOString() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        -1776
+      ],
+      "id": "ce80502e-9e9f-4bce-a98b-3550a17e4d66",
+      "name": "Score Lead"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldXwAu9Wl5fxzs9",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbldXwAu9Wl5fxzs9"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $json.phone }}",
+            "language": "={{ $json.language }}",
+            "name": "={{ $json.name }}",
+            "service_interest": "={{ $json.service_interest }}",
+            "score": "={{ $json.score }}",
+            "status": "={{ $json.status }}",
+            "last_seen": "={{ $json.last_seen }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_interest",
+              "displayName": "service_interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "new",
+                  "value": "new"
+                },
+                {
+                  "name": "qualified",
+                  "value": "qualified"
+                },
+                {
+                  "name": "booked",
+                  "value": "booked"
+                },
+                {
+                  "name": "handoff",
+                  "value": "handoff"
+                },
+                {
+                  "name": "lost",
+                  "value": "lost"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "first_seen",
+              "displayName": "first_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "last_seen",
+              "displayName": "last_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -896,
+        -1776
+      ],
+      "id": "90f5b0b4-306c-4a69-89c9-92575bc295fb",
+      "name": "Upsert Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\nconst L = c.language === 'es' ? 'es' : 'en';\nconst t = { en: 'Thanks, I noted that! Would you like to see our prices or book an appointment?', es: '¡Gracias, lo anoté! ¿Desea ver nuestros precios o agendar una cita?' };\nreturn [{ json: { ...c, reply_text: t[L], tool_used: 'template:lead_info', new_state: c.state, new_pending_slots: c.pending_slots, new_pending_service: c.pending_service_id, new_pending_appt: c.pending_appointment_id } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -1120
+      ],
+      "id": "c67f905a-fd12-430c-b3d5-060cacbe12ef",
+      "name": "Lead Reply"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblcXYKM5RdX7K2Vu",
+          "mode": "list",
+          "cachedResultName": "Config",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblcXYKM5RdX7K2Vu"
+        },
+        "filterByFormula": "={key} = 'staff_alert_number'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -1168,
+        -720
+      ],
+      "id": "fd55b04a-55b8-4f56-b5f2-4e6c732047ea",
+      "name": "Get Staff Number",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $('Quick Rules').first().json;\n// FIX: Added .fields to properly target the Airtable object structure\nconst staff = $('Get Staff Number').first().json.fields.value; \nconst L = c.language === 'es' ? 'es' : 'en';\nconst t = { \n  en: 'Okay, I am connecting you with our team. They will reply as soon as possible during business hours. Thank you for your patience.', \n  es: 'De acuerdo, le estoy conectando con nuestro equipo. Le responderán lo antes posible en horario de atención. Gracias por su paciencia.' \n};\nconst alert = 'Handoff requested by ' + (c.name || 'a customer') + ' (' + c.phone + '). Last message: ' + c.text + '. The bot is paused for this chat. To resume it, untick human_takeover in Airtable (Conversations).';\nreturn [{ json: { ...c, staff_number: staff, alert_text: alert, reply_text: t[L], tool_used: 'handoff', new_state: c.state, new_pending_slots: c.pending_slots, new_pending_service: c.pending_service_id, new_pending_appt: c.pending_appointment_id } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -944,
+        -720
+      ],
+      "id": "e3bc4e2f-8b69-4169-837c-079fad0358e9",
+      "name": "Handoff"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ZtvnnHd1WBtoX",
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbl6ZtvnnHd1WBtoX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "human_takeover": true,
+            "id": "={{ $json.conv_id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "idle",
+                  "value": "idle"
+                },
+                {
+                  "name": "choosing_service",
+                  "value": "choosing_service"
+                },
+                {
+                  "name": "choosing_slot",
+                  "value": "choosing_slot"
+                },
+                {
+                  "name": "awaiting_payment",
+                  "value": "awaiting_payment"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_service_id",
+              "displayName": "pending_service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_slots",
+              "displayName": "pending_slots",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_appointment_id",
+              "displayName": "pending_appointment_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "human_takeover",
+              "displayName": "human_takeover",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        -688
+      ],
+      "id": "f589109e-6d5f-4207-b998-57e7f041ae32",
+      "name": "Update Human Takeover",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "phone": "={{ $json.staff_number }}",
+        "message": "={{ $json.alert_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -496
+      ],
+      "id": "e1e5c87e-da29-42c1-a224-7f795ccc6a15",
+      "name": "Alert Admin",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldXwAu9Wl5fxzs9",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbldXwAu9Wl5fxzs9"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $json.phone }}",
+            "status": "handoff"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_interest",
+              "displayName": "service_interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "new",
+                  "value": "new"
+                },
+                {
+                  "name": "qualified",
+                  "value": "qualified"
+                },
+                {
+                  "name": "booked",
+                  "value": "booked"
+                },
+                {
+                  "name": "handoff",
+                  "value": "handoff"
+                },
+                {
+                  "name": "lost",
+                  "value": "lost"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "first_seen",
+              "displayName": "first_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "last_seen",
+              "displayName": "last_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -496,
+        -496
+      ],
+      "id": "d45f93a4-53ea-4518-89d4-897b86b7cc86",
+      "name": "Upsert Leads",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Wassenger Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Text?": {
+      "main": [
+        [
+          {
+            "node": "Log Inbound",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Inbound": {
+      "main": [
+        [
+          {
+            "node": "Get Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversation": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Context": {
+      "main": [
+        [
+          {
+            "node": "Human In Control?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Human In Control?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Services",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Services": {
+      "main": [
+        [
+          {
+            "node": "Quick Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quick Rules": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Get Staff Number",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Simple Replies",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Booking Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Intent": {
+      "main": [
+        [
+          {
+            "node": "Validate AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Save Language",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "By Intent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Language": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Replies": {
+      "main": [
+        [
+          {
+            "node": "Save State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save State": {
+      "main": [
+        []
+      ]
+    },
+    "Output Guard": {
+      "main": [
+        [
+          {
+            "node": "Send Reply",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Outbound",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate": {
+      "main": [
+        [
+          {
+            "node": "If Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Duplicate?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Is Text?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "By Intent": {
+      "main": [
+        [
+          {
+            "node": "Get FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Price Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Booking Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Booking Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Lead Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Staff Number",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Simple Replies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get FAQ": {
+      "main": [
+        [
+          {
+            "node": "Build FAQ List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build FAQ List": {
+      "main": [
+        [
+          {
+            "node": "Match FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match FAQ": {
+      "main": [
+        [
+          {
+            "node": "FAQ Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ Reply": {
+      "main": [
+        [
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Price Reply": {
+      "main": [
+        [
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Router": {
+      "main": [
+        [
+          {
+            "node": "Booking Step",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking Step": {
+      "main": [
+        [
+          {
+            "node": "Ask Service",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Calendar Events",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Recheck Slot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Choice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Service": {
+      "main": [
+        [
+          {
+            "node": "Save State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Calendar Events": {
+      "main": [
+        [
+          {
+            "node": "Get Held Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Held Slots": {
+      "main": [
+        [
+          {
+            "node": "Make Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make Slots": {
+      "main": [
+        [
+          {
+            "node": "Save State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recheck Slot": {
+      "main": [
+        [
+          {
+            "node": "Slot still free?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slot still free?": {
+      "main": [
+        [
+          {
+            "node": "Create Held Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slot Taken",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slot Taken": {
+      "main": [
+        [
+          {
+            "node": "Save State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invalid Choice": {
+      "main": [
+        [
+          {
+            "node": "Save State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Held Appointment": {
+      "main": [
+        [
+          {
+            "node": "Create Stripe Checkout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Stripe Checkout": {
+      "main": [
+        [
+          {
+            "node": "Payment Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment Reply": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Lead": {
+      "main": [
+        [
+          {
+            "node": "Score Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Lead": {
+      "main": [
+        [
+          {
+            "node": "Upsert Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Lead": {
+      "main": [
+        []
+      ]
+    },
+    "Lead Reply": {
+      "main": [
+        [
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Staff Number": {
+      "main": [
+        [
+          {
+            "node": "Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handoff": {
+      "main": [
+        [
+          {
+            "node": "Update Human Takeover",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Output Guard",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Alert Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Human Takeover": {
+      "main": [
+        []
+      ]
+    },
+    "Alert Admin": {
+      "main": [
+        [
+          {
+            "node": "Upsert Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "weMzd0ztUd4bfpRe",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "America/Chicago"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

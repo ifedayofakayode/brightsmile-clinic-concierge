@@ -1,0 +1,324 @@
+{
+  "name": "Expire Holds",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "06b20de6-753e-42d4-bf67-b5474bb981aa",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "filterByFormula": "={status}='held'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "208d6b20-10f0-49e6-a539-944fa1750893",
+      "name": "Find Held Appointments",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = DateTime.now();\nreturn $input.all().filter(i => {\n  const f = i.json.fields || i.json;\n  return i.json.id && f.hold_expires_iso && DateTime.fromISO(f.hold_expires_iso) < now;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "72cde846-280f-47df-9a41-fbf2c02a6f37",
+      "name": "Keep Expired"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "status": "expired"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "appt_id",
+              "displayName": "appt_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_iso",
+              "displayName": "start_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "end_iso",
+              "displayName": "end_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "held",
+                  "value": "held"
+                },
+                {
+                  "name": "paid",
+                  "value": "paid"
+                },
+                {
+                  "name": "confirmed",
+                  "value": "confirmed"
+                },
+                {
+                  "name": "cancelled",
+                  "value": "cancelled"
+                },
+                {
+                  "name": "expired",
+                  "value": "expired"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hold_expires_iso",
+              "displayName": "hold_expires_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stripe_session_id",
+              "displayName": "stripe_session_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "deposit_usd",
+              "displayName": "deposit_usd",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "45ec7f1e-192e-45f7-9d44-e72b4d8ec266",
+      "name": "Mark as Expired",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Held Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Held Appointments": {
+      "main": [
+        [
+          {
+            "node": "Keep Expired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Expired": {
+      "main": [
+        [
+          {
+            "node": "Mark as Expired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "weMzd0ztUd4bfpRe",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

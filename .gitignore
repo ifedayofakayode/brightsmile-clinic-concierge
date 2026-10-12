@@ -1,0 +1,17 @@
+# Secrets and local config
+.env
+.env.*
+*.key
+*.pem
+
+# Raw n8n exports can contain pinned test data (real phone numbers and messages).
+# Export into workflows/raw/, run scripts/check_workflow.py --fix, and commit only the sanitized copy.
+workflows/raw/
+*.raw.json
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+__pycache__/

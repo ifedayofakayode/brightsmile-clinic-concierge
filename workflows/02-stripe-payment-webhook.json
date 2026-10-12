@@ -1,0 +1,950 @@
+{
+  "name": "Stripe Payment Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "checkout.session.completed"
+        ]
+      },
+      "type": "n8n-nodes-base.stripeTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        0
+      ],
+      "id": "b3dce95b-982b-4e08-9378-af306d5295f1",
+      "name": "Stripe Trigger",
+      "webhookId": "60f2a092-ef2d-40aa-9287-edab482f7d29",
+      "credentials": {
+        "stripeApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Stripe account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "id": "={{ $json.data.object.metadata.appointment_record_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "f72ef8f5-566b-47dc-970b-5f7cc1462ec0",
+      "name": "Get Appointment",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9ae178c9-5434-494c-9da7-3634df70ec12",
+              "leftValue": "={{ $json.fields.status }}",
+              "rightValue": "held",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        0
+      ],
+      "id": "b76129c4-170d-44f4-b9c3-13c8879bacdc",
+      "name": "Still Held?"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "BrightSmile"
+        },
+        "start": "={{ $('Get Appointment').item.json.fields.start_iso }}",
+        "end": "={{ $('Get Appointment').item.json.fields.end_iso }}",
+        "additionalFields": {
+          "description": "=Phone: {{ $('Get Appointment').item.json.fields.phone }}",
+          "summary": "=Appointment: {{ $('Get Appointment').item.json.fields.service_id }} ({{ $('Get Appointment').item.json.fields.name }})"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "cbd7bc81-81c0-4272-91c1-7bd9dc0a1550",
+      "name": "Create Calendar Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblPZ9U46RMJDSlK8",
+          "mode": "list",
+          "cachedResultName": "Appointments",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tblPZ9U46RMJDSlK8"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Get Appointment').item.json.id }}",
+            "status": "confirmed",
+            "calendar_event_id": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "appt_id",
+              "displayName": "appt_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_id",
+              "displayName": "service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "start_iso",
+              "displayName": "start_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "end_iso",
+              "displayName": "end_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "held",
+                  "value": "held"
+                },
+                {
+                  "name": "paid",
+                  "value": "paid"
+                },
+                {
+                  "name": "confirmed",
+                  "value": "confirmed"
+                },
+                {
+                  "name": "cancelled",
+                  "value": "cancelled"
+                },
+                {
+                  "name": "expired",
+                  "value": "expired"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hold_expires_iso",
+              "displayName": "hold_expires_iso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stripe_session_id",
+              "displayName": "stripe_session_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "calendar_event_id",
+              "displayName": "calendar_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "deposit_usd",
+              "displayName": "deposit_usd",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        -96
+      ],
+      "id": "867281a8-7581-4c4e-bd4e-3b7cd18dc127",
+      "name": "Confirm Appointment",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl6ZtvnnHd1WBtoX",
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbl6ZtvnnHd1WBtoX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "human_takeover": false,
+            "phone": "={{ $('Get Appointment').item.json.fields.phone }}",
+            "state": "idle"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "state",
+              "displayName": "state",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "idle",
+                  "value": "idle"
+                },
+                {
+                  "name": "choosing_service",
+                  "value": "choosing_service"
+                },
+                {
+                  "name": "choosing_slot",
+                  "value": "choosing_slot"
+                },
+                {
+                  "name": "awaiting_payment",
+                  "value": "awaiting_payment"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_service_id",
+              "displayName": "pending_service_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_slots",
+              "displayName": "pending_slots",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pending_appointment_id",
+              "displayName": "pending_appointment_id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "human_takeover",
+              "displayName": "human_takeover",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        -96
+      ],
+      "id": "485b729b-65a3-465f-b2b4-68a38be9940c",
+      "name": "Reset Conversation",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appVCTMpuoskddFlk",
+          "mode": "list",
+          "cachedResultName": "ClinicConcierge",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbldXwAu9Wl5fxzs9",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appVCTMpuoskddFlk/tbldXwAu9Wl5fxzs9"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('Get Appointment').item.json.fields.phone }}",
+            "status": "booked"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "language",
+              "displayName": "language",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "en",
+                  "value": "en"
+                },
+                {
+                  "name": "es",
+                  "value": "es"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "service_interest",
+              "displayName": "service_interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "new",
+                  "value": "new"
+                },
+                {
+                  "name": "qualified",
+                  "value": "qualified"
+                },
+                {
+                  "name": "booked",
+                  "value": "booked"
+                },
+                {
+                  "name": "handoff",
+                  "value": "handoff"
+                },
+                {
+                  "name": "lost",
+                  "value": "lost"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "first_seen",
+              "displayName": "first_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_seen",
+              "displayName": "last_seen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        -96
+      ],
+      "id": "2ce1306f-7f6a-4f2d-9a4e-cb11f9d05e2a",
+      "name": "Mark Lead Booked",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "BrightSmile"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const appt = $('Get Appointment').first().json.fields || {};\nconst conv = $('Reset Conversation').first().json.fields || {};\nconst L = conv.language === 'es' ? 'es' : 'en';\nconst when = DateTime.fromISO(appt.start_iso).setZone('America/Chicago').setLocale(L).toFormat('cccc d LLLL, h:mm a');\nconst text = L === 'es'\n  ? '¡Su cita está confirmada para el ' + when + ' (hora del Centro)! Esperamos verle pronto. Responda HUMANO si necesita algo.'\n  : 'Your appointment is confirmed for ' + when + ' (Central Time)! We look forward to seeing you. Reply HUMAN if you need anything.';\nreturn [{ json: { phone: appt.phone, reply_text: text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        -96
+      ],
+      "id": "63bd8d67-fb81-42dc-af36-1ab700e001aa",
+      "name": "Build Confirmation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "91732958-0af6-4815-9229-b5e8dd9244a4",
+              "leftValue": "={{ $('Get Appointment').item.json.fields.status }}",
+              "rightValue": "confirmed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        96
+      ],
+      "id": "6b9882ab-5d36-4d30-b30e-00d19ca773e0",
+      "name": "Already Confirmed?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const appt = $('Get Appointment').first().json;\nconst f = appt.fields || {};\nconst NL = String.fromCharCode(10);\n\n// The language is not known on this branch, so the message is sent in both languages\nconst en = 'We received your payment but your time slot was released. Our team will contact you shortly to fix this.';\nconst es = 'Recibimos su pago, pero su horario fue liberado. Nuestro equipo se comunicará con usted pronto para resolverlo.';\n\nconst reply_text = en + NL + NL + es;\n\nconst alert_text = 'LATE PAYMENT: ' + (f.name || 'a customer') + ' (' + (f.phone || 'no phone') + ') paid the deposit after the hold expired. Appointment record: ' + appt.id + '. Please contact them and fix the booking.';\n\nreturn [{ json: {\n  phone: f.phone,\n  reply_text,\n  alert_text,\n  appt_record_id: appt.id\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        192
+      ],
+      "id": "de5f65e2-0361-4de7-9fa8-cc964d141efc",
+      "name": "Build Late Payment Message"
+    },
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "phone": "={{ $json.phone }}",
+        "message": "={{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        -96
+      ],
+      "id": "31bfaecc-4b1e-4d9b-9274-7dc843428656",
+      "name": "Send Reply",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "phone": "={{ $json.phone }}",
+        "message": "={{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        864,
+        192
+      ],
+      "id": "19ec3677-c5b4-42c2-b15a-b899280a0ada",
+      "name": "Send Late Reply",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "device": "YOUR_WASSENGER_DEVICE_ID",
+        "phone": "+10000000000",
+        "message": "Late payment notification",
+        "options": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        192
+      ],
+      "id": "a890d895-cda5-44e4-bdd9-16482d545d08",
+      "name": "Message Admin",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL",
+          "name": "Wassenger Key account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Stripe Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Appointment": {
+      "main": [
+        [
+          {
+            "node": "Still Held?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Still Held?": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Already Confirmed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Confirm Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirm Appointment": {
+      "main": [
+        [
+          {
+            "node": "Reset Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Conversation": {
+      "main": [
+        [
+          {
+            "node": "Mark Lead Booked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Lead Booked": {
+      "main": [
+        [
+          {
+            "node": "Build Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Send Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Already Confirmed?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build Late Payment Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Late Payment Message": {
+      "main": [
+        [
+          {
+            "node": "Send Late Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Late Reply": {
+      "main": [
+        [
+          {
+            "node": "Message Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "weMzd0ztUd4bfpRe",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

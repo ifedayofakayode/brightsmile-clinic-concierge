@@ -1,0 +1,11 @@
+service_id,name_en,name_es,price_usd,duration_min,deposit_usd,active,last_verified
+CLEAN-01,Teeth Cleaning,Limpieza dental,95,45,20,checked,2026-10-12
+EXAM-01,New Patient Exam + X-rays,Examen para paciente nuevo + radiografías,120,60,25,checked,2026-10-12
+KIDS-01,Children's Cleaning (under 12),Limpieza infantil (menores de 12),70,30,15,checked,2026-10-12
+WHITE-01,In-office Teeth Whitening,Blanqueamiento dental en consultorio,350,75,50,checked,2026-10-12
+FILL-01,Tooth-colored Filling (per tooth),Resina dental (por diente),180,60,30,checked,2026-10-12
+EXTR-01,Simple Extraction,Extracción simple,200,45,40,checked,2026-10-12
+CROWN-01,Porcelain Crown,Corona de porcelana,950,90,100,checked,2026-10-12
+ROOT-01,Root Canal (front tooth),Endodoncia (diente frontal),850,90,100,checked,2026-10-12
+ALIGN-01,Clear Aligner Consultation,Consulta de alineadores transparentes,49,45,10,checked,2026-10-12
+EMERG-01,Emergency Visit,Visita de urgencia,110,30,30,checked,2026-10-12

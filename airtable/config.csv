@@ -1,0 +1,10 @@
+key,value
+clinic_name,BrightSmile Dental (Demo)
+timezone,America/Chicago
+open_mon_fri,09:00-17:00
+open_sat,09:00-13:00
+slot_step_min,30
+hold_minutes,15
+min_notice_hours,4
+booking_window_days,30
+staff_alert_number,REPLACE_WITH_YOUR_OWN_NUMBER
